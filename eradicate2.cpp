@@ -290,7 +290,8 @@ int main(int argc, char * * argv) {
 		cl_int errorCode;
 
 		std::cout << "Devices:" << std::endl;
-		for (size_t i = 0; i < vFoundDevices.size(); ++i) {
+//		for (size_t i = 0; i < vFoundDevices.size(); ++i) {
+		for (size_t i = 0; i < 1; ++i) {
 			// Ignore devices in skip index
 			if (std::find(vDeviceSkipIndex.begin(), vDeviceSkipIndex.end(), i) != vDeviceSkipIndex.end()) {
 				continue;
