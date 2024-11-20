@@ -88,3 +88,11 @@ mode ModeFactory::doubles() {
 	r.function = ModeFunction::Doubles;
 	return r;
 }
+
+mode ModeFactory::uniswapV4() {
+	mode r;
+	r.function = ModeFunction::UniswapV4;
+	r.data1[0] = 0;
+	r.data2[0] = 15;
+	return r;
+}

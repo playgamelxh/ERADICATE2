@@ -1,5 +1,5 @@
 enum ModeFunction {
-	Benchmark, ZeroBytes, Matching, Leading, Range, Mirror, Doubles, LeadingRange
+	Benchmark, ZeroBytes, Matching, Leading, Range, Mirror, Doubles, LeadingRange,UniswapV4
 };
 
 typedef struct {
@@ -24,6 +24,7 @@ void eradicate2_score_range(const uchar * const hash, __global result * const pR
 void eradicate2_score_leadingrange(const uchar * const hash, __global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round);
 void eradicate2_score_mirror(const uchar * const hash, __global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round);
 void eradicate2_score_doubles(const uchar * const hash, __global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round);
+void eradicate2_score_uniswapV4(const uchar * const hash, __global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round);
 
 __kernel void eradicate2_iterate(__global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round) {
 	ethhash h = { .q = { ERADICATE2_INITHASH } };
@@ -76,6 +77,10 @@ __kernel void eradicate2_iterate(__global result * const pResult, __global const
 	case LeadingRange:
 		eradicate2_score_leadingrange(h.b + 12, pResult, pMode, scoreMax, deviceIndex, round);
 		break;
+
+    case UniswapV4:
+        eradicate2_score_uniswapV4(h.b + 12, pResult, pMode, scoreMax, deviceIndex, round);
+        break;
 	}
 }
 
@@ -240,6 +245,68 @@ void eradicate2_score_doubles(const uchar * const hash, __global result * const 
 			break;
 		}
 	}
+
+	eradicate2_result_update(hash, pResult, score, scoreMax, deviceIndex, round);
+}
+
+void eradicate2_score_uniswapV4(const uchar * const hash, __global result * const pResult, __global const mode * const pMode, const uchar scoreMax, const uint deviceIndex, const uint round) {
+	const size_t id = get_global_id(0);
+	int score = 0;
+
+	int startingZeros = 1;
+    int startingFours = 1;
+    int firstFour = 1;
+    uchar fourCounts = 0;
+    int flag = 0;
+    for (int i = 0; i < 20; ++i) {
+        if (flag) {
+            break;
+        }
+        const uchar first = (hash[i] & 0xF0) >> 4;
+        const uchar second = (hash[i] & 0x0F);
+        for (int j=0; j<=1; j++) {
+            uchar current = j ? second : first;
+            // Leading zeros
+            if (startingZeros && current == 0) {
+                score += 10;
+                continue;
+            } else {
+                startingZeros = 0;
+            }
+            // Leading fours
+            if (startingFours) {
+                if (firstFour && current != 4) {
+                    score = 0; // auto reject
+                    flag = 1;
+                    break;
+                }
+                if (current == 4) {
+                    fourCounts++;
+                    if (fourCounts == 4) {
+                        score += 40;
+                        // if the last four bytes are 4, add 20 points
+                        if (i >= 16) {
+                            score += 20;
+                        }
+                    }
+                } else {
+                    if (fourCounts == 4) {
+                        score += 20; // if the last four bytes are 4, add 20 points
+                    }
+                    startingFours = 0;
+                }
+                firstFour = 0;
+            }
+            // every 4 is a point
+            if (current == 4) {
+                score += 1;
+            }
+        }
+    }
+    // check last four bytes
+    if (hash[18] == 0x44 && hash[19] == 0x44) {
+        score += 20;
+    }
 
 	eradicate2_result_update(hash, pResult, score, scoreMax, deviceIndex, round);
 }

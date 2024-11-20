@@ -23,6 +23,7 @@ class ModeFactory {
 		static mode letters();
 		static mode numbers();
 		static mode doubles();
+		static mode uniswapV4();
 };
 
 #endif /* HPP_MODEFACTORY */
