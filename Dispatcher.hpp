@@ -19,7 +19,7 @@
 #include "types.hpp"
 
 #define ERADICATE2_SPEEDSAMPLES 20
-#define ERADICATE2_MAX_SCORE 40
+#define ERADICATE2_MAX_SCORE 400
 
 class Dispatcher {
 	private:
