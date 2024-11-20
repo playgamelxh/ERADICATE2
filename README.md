@@ -54,4 +54,6 @@ usage: ./ERADICATE2 [OPTIONS]
 
     Author: Johan Gustafsson <johan@johgu.se>
     Beer donations: 0x000dead000ae1c8e8ac27103e4ff65f42a4e9203
+    
+  ./ERADICATE2.x64 -A 0x48E516B34A1274f49457b9C6182097796D0498Cb -I 0x94d114296a5af85c1fd2dc039cdaa32f1ed4b0fe0868f02d888bfc91feb645d9 --uniswap-v4
 ```
